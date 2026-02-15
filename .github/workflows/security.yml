@@ -9,6 +9,8 @@ on:
 jobs:
   security:
     runs-on: ubuntu-latest
+    env:
+      SAFETY_API_KEY: ${{ secrets.SAFETY_API_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -45,10 +47,10 @@ jobs:
         run: python -m pip_audit --strict -r audit-requirements.txt
 
       - name: Safety
-        if: ${{ secrets.SAFETY_API_KEY != '' }}
+        if: ${{ env.SAFETY_API_KEY != '' }}
         continue-on-error: true
-        run: python -m safety check --full-report -r audit-requirements.txt --key ${{ secrets.SAFETY_API_KEY }}
+        run: python -m safety check --full-report -r audit-requirements.txt --key ${{ env.SAFETY_API_KEY }}
 
       - name: Safety (skipped)
-        if: ${{ secrets.SAFETY_API_KEY == '' }}
+        if: ${{ env.SAFETY_API_KEY == '' }}
         run: echo "Skipping Safety scan because SAFETY_API_KEY is not configured. Bandit and pip-audit still enforced."
