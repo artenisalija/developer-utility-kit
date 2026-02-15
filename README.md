@@ -35,20 +35,28 @@ Design choices:
 
 ## Installation
 
+Install from PyPI:
+
 ```bash
 python -m pip install --upgrade pip
 pip install developer-utility-toolkit
 ```
 
-Install all optional features:
+Install with all optional features:
 
 ```bash
 pip install "developer-utility-toolkit[all]"
 ```
 
+Install isolated with `pipx` (recommended for CLI tools):
+
+```bash
+pipx install developer-utility-toolkit
+```
+
 ## Docker (Alternative Install)
 
-Pull from GitHub Container Registry:
+Install via GitHub Packages container (GHCR):
 
 ```bash
 docker pull ghcr.io/artenisalija/developer-utility-kit:latest
