@@ -30,12 +30,12 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-image = ["pillow==11.1.0"]
+image = ["pillow==12.1.1"]
 web = ["requests==2.32.4"]
 xml = ["lxml==5.3.0"]
 yaml = ["pyyaml==6.0.2"]
 all = [
-  "pillow==11.1.0",
+  "pillow==12.1.1",
   "requests==2.32.4",
   "lxml==5.3.0",
   "pyyaml==6.0.2"
