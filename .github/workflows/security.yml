@@ -45,4 +45,9 @@ jobs:
         run: python -m pip_audit --strict -r audit-requirements.txt
 
       - name: Safety
-        run: python -m safety check --full-report -r audit-requirements.txt
+        if: ${{ secrets.SAFETY_API_KEY != '' }}
+        run: python -m safety check --full-report -r audit-requirements.txt --key ${{ secrets.SAFETY_API_KEY }}
+
+      - name: Safety (skipped)
+        if: ${{ secrets.SAFETY_API_KEY == '' }}
+        run: echo "Skipping Safety scan because SAFETY_API_KEY is not configured. Bandit and pip-audit still enforced."
