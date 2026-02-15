@@ -23,9 +23,13 @@ def generate_hash_report(data: bytes, text_value: str | None = None) -> list[Has
 
     report.append(HashEntry("MD2 Hash Generator", _optional_hexdigest("md2", data)))
     report.append(HashEntry("MD4 Hash Generator", _optional_hexdigest("md4", data)))
-    report.append(HashEntry("MD5 Hash Generator", hashlib.md5(data).hexdigest()))  # noqa: S324
+    report.append(
+        HashEntry("MD5 Hash Generator", hashlib.md5(data).hexdigest())  # noqa: S324  # nosec B324
+    )
     report.append(HashEntry("NTLM Hash Generator", _ntlm_hash(text_value)))
-    report.append(HashEntry("SHA1 Hash Generator", hashlib.sha1(data).hexdigest()))  # noqa: S324
+    report.append(
+        HashEntry("SHA1 Hash Generator", hashlib.sha1(data).hexdigest())  # noqa: S324  # nosec B324
+    )
     report.append(HashEntry("SHA2 Hash Generator", hashlib.sha256(data).hexdigest()))
     report.append(HashEntry("SHA224 Hash Generator", hashlib.sha224(data).hexdigest()))
     report.append(HashEntry("SHA256 Hash Generator", hashlib.sha256(data).hexdigest()))
@@ -61,7 +65,7 @@ def _ntlm_hash(text_value: str | None) -> str:
     if text_value is None:
         return "Unavailable: NTLM requires text input"
     try:
-        hasher = hashlib.new("md4")  # noqa: S324
+        hasher = hashlib.new("md4")  # noqa: S324  # nosec B324
     except (ValueError, TypeError):
         return "Unavailable on this Python/OpenSSL build (requires MD4)"
     hasher.update(text_value.encode("utf-16le"))  # pragma: no cover

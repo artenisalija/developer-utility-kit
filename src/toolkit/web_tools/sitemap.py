@@ -45,8 +45,10 @@ def fetch_sitemap_urls(url: str, timeout: int = DEFAULT_TIMEOUT) -> list[str]:
 
 
 def _fetch_url(url: str, timeout: int) -> str:
-    request = Request(url, headers={"User-Agent": "developer-utility-toolkit/0.1.0"})  # noqa: S310
-    with urlopen(request, timeout=timeout) as response:  # noqa: S310
+    request = Request(  # noqa: S310  # nosec B310
+        url, headers={"User-Agent": "developer-utility-toolkit/0.1.0"}
+    )
+    with urlopen(request, timeout=timeout) as response:  # noqa: S310  # nosec B310
         data: bytes = response.read()
     return data.decode("utf-8")
 
