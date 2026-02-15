@@ -54,13 +54,13 @@ pip install "git+https://github.com/artenisalija/developer-utility-toolkit.git"
 Install a specific version tag (recommended):
 
 ```bash
-pip install "git+https://github.com/artenisalija/developer-utility-toolkit.git@v0.1.0"
+pip install "git+https://github.com/artenisalija/developer-utility-toolkit.git@v0.1.1"
 ```
 
 Install from GitHub with all extras:
 
 ```bash
-pip install "developer-utility-toolkit[all] @ git+https://github.com/artenisalija/developer-utility-toolkit.git@v0.1.0"
+pip install "developer-utility-toolkit[all] @ git+https://github.com/artenisalija/developer-utility-toolkit.git@v0.1.1"
 ```
 
 Install developer tooling:
@@ -127,8 +127,8 @@ pre-commit run --all-files
 3. Bump version in `pyproject.toml`.
 4. Tag and push:
    ```bash
-   git tag v0.1.0
-   git push origin v0.1.0
+   git tag v0.1.1
+   git push origin v0.1.1
    ```
 5. GitHub Action `release.yml` publishes automatically.
 
