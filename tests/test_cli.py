@@ -105,6 +105,38 @@ def test_convert_all_prompt_choice() -> None:
     assert "Input format:" in result.stdout
 
 
+def test_hash_all_command() -> None:
+    result = runner.invoke(app, ["hash-all", "--text", "hello"])
+    assert result.exit_code == 0
+    assert "MD5 Hash Generator:" in result.stdout
+    assert "SHA256 Hash Generator:" in result.stdout
+
+
+def test_hash_all_from_binary() -> None:
+    result = runner.invoke(app, ["hash-all", "--text", "01101000 01101001", "--from", "binary"])
+    assert result.exit_code == 0
+    assert "Hash report source: binary" in result.stdout
+
+
+def test_interactive_command() -> None:
+    result = runner.invoke(app, ["interactive"], input="E\nhello\n")
+    assert result.exit_code == 0
+    assert "Input format: text" in result.stdout
+    assert "MD5 Hash Generator:" in result.stdout
+
+
+def test_interactive_command_invalid_choice() -> None:
+    result = runner.invoke(app, ["interactive"], input="Z\n")
+    assert result.exit_code == 2
+    assert "Invalid choice" in result.stderr
+
+
+def test_formats_command() -> None:
+    result = runner.invoke(app, ["formats"])
+    assert result.exit_code == 0
+    assert "text ->" in result.stdout
+
+
 def test_analyze_missing_input_errors() -> None:
     result = runner.invoke(app, ["analyze"])
     assert result.exit_code == 2

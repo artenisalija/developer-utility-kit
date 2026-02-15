@@ -8,6 +8,7 @@ from typing import Annotated
 import typer
 
 from toolkit.core.detector import detect_from_path, detect_from_text
+from toolkit.core.hashing import generate_hash_report
 from toolkit.core.io_utils import read_text_file, safe_output_path, write_text_file
 from toolkit.core.registry import TransformerRegistry
 from toolkit.formatters.json_tools import format_json, minify_json, validate_json
@@ -20,7 +21,7 @@ app = typer.Typer(
     help=(
         "Developer Utility Toolkit.\n\n"
         "Use 'toolkit formats' to view all supported direct conversions.\n"
-        "Use 'toolkit convert-all --ask --text <value>' for guided, multi-output conversion."
+        "Use 'toolkit interactive' for guided conversion + full hash/checksum output."
     )
 )
 image_app = typer.Typer(help="Image utilities")
@@ -78,6 +79,14 @@ def _prompt_for_format(options: list[str]) -> str:
         if 0 <= index < len(options):
             return options[index]
     raise ValueError("Invalid choice. Use a valid number or letter.")
+
+
+def _display_hash_report(text_value: str, input_label: str) -> None:
+    typer.echo("")
+    typer.echo(f"Hash report source: {input_label}")
+    entries = generate_hash_report(text_value.encode("utf-8"), text_value=text_value)
+    for entry in entries:
+        typer.echo(f"{entry.label}: {entry.value}")
 
 
 @app.command("analyze")
@@ -176,6 +185,39 @@ def convert_all_command(
         raise typer.Exit(code=2) from exc
 
 
+@app.command("interactive")
+def interactive_command() -> None:
+    """Guided mode: choose input format, enter value, print conversions + hashes."""
+    history = _history()
+    try:
+        registry = TransformerRegistry()
+        supported_inputs = sorted({item[0] for item in registry.available_transformations()})
+        source = _prompt_for_format(supported_inputs)
+        data = typer.prompt("Enter input value")
+
+        available = registry.available_transformations(source)
+        typer.echo(f"Input format: {source}")
+        for _, target in available:
+            converted = registry.transform(data, source, target)
+            typer.echo("")
+            typer.echo(f"[{source}->{target}]")
+            typer.echo(converted)
+
+        if source == "text":
+            hash_text = data
+        else:
+            try:
+                hash_text = registry.transform(data, source, "text")
+            except ValueError:
+                hash_text = data
+        _display_hash_report(hash_text, source)
+        history.add("interactive", "success", source)
+    except (ValueError, RuntimeError) as exc:
+        history.add("interactive", "error", str(exc))
+        typer.echo(f"Error: {exc}", err=True)
+        raise typer.Exit(code=2) from exc
+
+
 @app.command("formats")
 def formats_command() -> None:
     """List all currently available direct conversion pairs."""
@@ -191,6 +233,33 @@ def formats_command() -> None:
     for input_type in sorted(by_input):
         outputs = ", ".join(sorted(by_input[input_type]))
         typer.echo(f"{input_type} -> {outputs}")
+
+
+@app.command("hash-all")
+def hash_all_command(
+    text: Annotated[str | None, typer.Option(help="Inline input text")] = None,
+    file: Annotated[Path | None, typer.Option(help="Input file path")] = None,
+    from_type: Annotated[str | None, typer.Option("--from", help="Input type override")] = None,
+) -> None:
+    """Generate all supported hash/checksum outputs for the input."""
+    history = _history()
+    try:
+        data = _load_input(text=text, file=file)
+        registry = TransformerRegistry()
+        source = from_type.lower().strip() if from_type else detect_from_text(data)
+        if source == "text":
+            hash_text = data
+        else:
+            try:
+                hash_text = registry.transform(data, source, "text")
+            except ValueError:
+                hash_text = data
+        _display_hash_report(hash_text, source)
+        history.add("hash-all", "success", source)
+    except (ValueError, RuntimeError) as exc:
+        history.add("hash-all", "error", str(exc))
+        typer.echo(f"Error: {exc}", err=True)
+        raise typer.Exit(code=2) from exc
 
 
 @app.command("format")

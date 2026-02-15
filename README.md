@@ -89,6 +89,9 @@ toolkit analyze --text '{"name":"dev"}'
 toolkit convert --from text --to base64 --text "hello"
 toolkit convert-all --text "hello" --from text
 toolkit convert-all --text "hello" --ask
+toolkit interactive
+toolkit hash-all --text "hello"
+toolkit hash-all --text "01101000 01101001" --from binary
 toolkit format --kind json --text '{"b":2,"a":1}'
 toolkit validate --kind xml --text '<root><a>1</a></root>'
 toolkit minify --kind json --text '{"b":2,"a":1}'
