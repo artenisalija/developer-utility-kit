@@ -92,6 +92,19 @@ def test_convert_from_file(tmp_path: Path) -> None:
     assert "HELLO" in result.stdout
 
 
+def test_convert_all_detected_binary() -> None:
+    result = runner.invoke(app, ["convert-all", "--text", "01101000 01101001", "--from", "binary"])
+    assert result.exit_code == 0
+    assert "[binary->text]" in result.stdout
+    assert "hi" in result.stdout
+
+
+def test_convert_all_prompt_choice() -> None:
+    result = runner.invoke(app, ["convert-all", "--text", "hello", "--ask"], input="E\n")
+    assert result.exit_code == 0
+    assert "Input format:" in result.stdout
+
+
 def test_analyze_missing_input_errors() -> None:
     result = runner.invoke(app, ["analyze"])
     assert result.exit_code == 2

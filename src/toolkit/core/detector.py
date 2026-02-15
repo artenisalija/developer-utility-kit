@@ -4,11 +4,14 @@ from __future__ import annotations
 
 import base64
 import json
+import re
 from pathlib import Path
 from urllib.parse import urlparse
 
 from defusedxml import ElementTree as DefusedET  # type: ignore[import-untyped]
 
+_BINARY_RE = re.compile(r"^[01\s]+$")
+_HEX_RE = re.compile(r"^[0-9a-fA-F]+$")
 _EXTENSION_MAP: dict[str, str] = {
     ".json": "json",
     ".xml": "xml",
@@ -41,6 +44,10 @@ def detect_from_text(data: str) -> str:
         return "json"
     if _is_xml(stripped):
         return "xml"
+    if _is_binary(stripped):
+        return "binary"
+    if _is_hex(stripped):
+        return "hex"
     if _is_base64(stripped):
         return "base64"
     return "text"
@@ -76,3 +83,13 @@ def _is_base64(value: str) -> bool:
     except Exception:
         return False
     return True
+
+
+def _is_binary(value: str) -> bool:
+    compact = "".join(value.split())
+    return bool(compact) and len(compact) % 8 == 0 and bool(_BINARY_RE.match(value))
+
+
+def _is_hex(value: str) -> bool:
+    compact = value.replace(" ", "")
+    return bool(compact) and len(compact) % 2 == 0 and bool(_HEX_RE.match(compact))

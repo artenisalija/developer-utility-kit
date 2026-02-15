@@ -21,6 +21,14 @@ def test_detect_base64() -> None:
     assert detect_from_text("aGVsbG8=") == "base64"
 
 
+def test_detect_binary() -> None:
+    assert detect_from_text("01101000 01101001") == "binary"
+
+
+def test_detect_hex() -> None:
+    assert detect_from_text("6869ab") == "hex"
+
+
 def test_detect_text_fallback() -> None:
     assert detect_from_text("hello world") == "text"
 

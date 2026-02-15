@@ -13,6 +13,8 @@ Security-focused, modular, format-aware Python CLI for common developer tasks.
 - Direct format conversion using a plugin-based transformer registry
 - JSON and XML formatting, minification, and validation
 - Encoding tools (Base64 and URL encode/decode)
+- Binary/Hex/Text/Base64 conversion utilities
+- Interactive conversion mode (choose format by number/letter and print all direct outputs)
 - Image pixelation utility (optional `pillow`)
 - Sitemap generator and sitemap fetcher with URL validation and request timeouts
 - Local command history (`~/.developer_utility_toolkit/history/history.jsonl`)
@@ -85,6 +87,8 @@ pip install ".[all,dev]"
 ```bash
 toolkit analyze --text '{"name":"dev"}'
 toolkit convert --from text --to base64 --text "hello"
+toolkit convert-all --text "hello" --from text
+toolkit convert-all --text "hello" --ask
 toolkit format --kind json --text '{"b":2,"a":1}'
 toolkit validate --kind xml --text '<root><a>1</a></root>'
 toolkit minify --kind json --text '{"b":2,"a":1}'

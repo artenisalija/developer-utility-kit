@@ -54,6 +54,26 @@ def _write_or_print(content: str, output: str | None, output_dir: Path) -> str:
     return str(target)
 
 
+def _prompt_for_format(options: list[str]) -> str:
+    typer.echo("Select input format:")
+    for idx, option in enumerate(options, start=1):
+        letter = chr(ord("A") + idx - 1)
+        typer.echo(f"  {idx}) [{letter}] {option}")
+    choice = typer.prompt("Choice (number or letter)").strip()
+    if not choice:
+        raise ValueError("Format choice is required")
+    if choice.isdigit():
+        index = int(choice) - 1
+        if 0 <= index < len(options):
+            return options[index]
+        raise ValueError("Invalid numeric choice")
+    if len(choice) == 1 and choice.isalpha():
+        index = ord(choice.upper()) - ord("A")
+        if 0 <= index < len(options):
+            return options[index]
+    raise ValueError("Invalid choice. Use a valid number or letter.")
+
+
 @app.command("analyze")
 def analyze_command(
     text: Annotated[str | None, typer.Option(help="Inline input text")] = None,
@@ -105,6 +125,47 @@ def convert_command(
         history.add("convert", "success", f"{detected}->{','.join(targets)}")
     except (ValueError, RuntimeError) as exc:
         history.add("convert", "error", str(exc))
+        typer.echo(f"Error: {exc}", err=True)
+        raise typer.Exit(code=2) from exc
+
+
+@app.command("convert-all")
+def convert_all_command(
+    text: Annotated[str | None, typer.Option(help="Inline input text")] = None,
+    file: Annotated[Path | None, typer.Option(help="Input file path")] = None,
+    from_type: Annotated[str | None, typer.Option("--from", help="Input type override")] = None,
+    ask: Annotated[bool, typer.Option(help="Prompt to choose input type")] = False,
+) -> None:
+    """Show all available direct conversions for one input."""
+    history = _history()
+    try:
+        data = _load_input(text=text, file=file)
+        registry = TransformerRegistry()
+        supported_inputs = sorted({item[0] for item in registry.available_transformations()})
+        detected = detect_from_text(data)
+        source = from_type.lower().strip() if from_type else detected
+
+        if ask:
+            source = _prompt_for_format(supported_inputs)
+        elif source not in supported_inputs:
+            typer.echo(f"Detected '{source}' is not directly convertible.")
+            source = _prompt_for_format(supported_inputs)
+
+        available = registry.available_transformations(source)
+        if not available:
+            raise ValueError(f"No available conversions for '{source}'")
+
+        typer.echo(f"Input format: {source}")
+        for _, target in available:
+            converted = registry.transform(data, source, target)
+            typer.echo("")
+            typer.echo(f"[{source}->{target}]")
+            typer.echo(converted)
+
+        targets = ",".join(target for _, target in available)
+        history.add("convert-all", "success", f"{source}->{targets}")
+    except (ValueError, RuntimeError) as exc:
+        history.add("convert-all", "error", str(exc))
         typer.echo(f"Error: {exc}", err=True)
         raise typer.Exit(code=2) from exc
 
