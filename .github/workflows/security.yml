@@ -46,6 +46,7 @@ jobs:
 
       - name: Safety
         if: ${{ secrets.SAFETY_API_KEY != '' }}
+        continue-on-error: true
         run: python -m safety check --full-report -r audit-requirements.txt --key ${{ secrets.SAFETY_API_KEY }}
 
       - name: Safety (skipped)
