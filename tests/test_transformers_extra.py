@@ -61,6 +61,12 @@ def test_binary_invalid_input() -> None:
         registry.transform("01012", "binary", "text")
 
 
+def test_binary_short_input_is_padded() -> None:
+    registry = TransformerRegistry()
+    result = registry.transform("1010", "binary", "hex")
+    assert result == "0a"
+
+
 def test_hex_invalid_input() -> None:
     registry = TransformerRegistry()
     with pytest.raises(ValueError):

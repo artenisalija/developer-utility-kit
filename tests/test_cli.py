@@ -105,6 +105,13 @@ def test_convert_all_prompt_choice() -> None:
     assert "Input format:" in result.stdout
 
 
+def test_convert_all_large_binary_partial_success() -> None:
+    result = runner.invoke(app, ["convert-all", "--text", "11111111", "--from", "binary"])
+    assert result.exit_code == 0
+    assert "Conversion failed:" in result.stdout
+    assert "[binary->base64]" in result.stdout
+
+
 def test_hash_all_command() -> None:
     result = runner.invoke(app, ["hash-all", "--text", "hello"])
     assert result.exit_code == 0
@@ -119,16 +126,35 @@ def test_hash_all_from_binary() -> None:
 
 
 def test_interactive_command() -> None:
-    result = runner.invoke(app, ["interactive"], input="E\nhello\n")
+    result = runner.invoke(app, ["interactive"], input="E\nhello\nA\n")
     assert result.exit_code == 0
     assert "Input format: text" in result.stdout
     assert "MD5 Hash Generator:" in result.stdout
+
+
+def test_interactive_command_single_target() -> None:
+    result = runner.invoke(app, ["interactive"], input="E\nhello\nB\nA\n")
+    assert result.exit_code == 0
+    assert "[text->base64]" in result.stdout
+
+
+def test_interactive_command_multiple_targets() -> None:
+    result = runner.invoke(app, ["interactive"], input="E\nhello\nC\nA,C\n")
+    assert result.exit_code == 0
+    assert "[text->base64]" in result.stdout
+    assert "[text->hex]" in result.stdout
 
 
 def test_interactive_command_invalid_choice() -> None:
     result = runner.invoke(app, ["interactive"], input="Z\n")
     assert result.exit_code == 2
     assert "Invalid choice" in result.stderr
+
+
+def test_interactive_command_invalid_target_selection() -> None:
+    result = runner.invoke(app, ["interactive"], input="E\nhello\nC\nZ\n")
+    assert result.exit_code == 2
+    assert "Invalid target selection" in result.stderr
 
 
 def test_formats_command() -> None:
@@ -145,6 +171,18 @@ def test_analyze_missing_input_errors() -> None:
 def test_sitemap_fetch_invalid_url_errors() -> None:
     result = runner.invoke(app, ["sitemap", "fetch", "--url", "ftp://example.com/sitemap.xml"])
     assert result.exit_code == 2
+
+
+def test_hash_all_from_hex() -> None:
+    result = runner.invoke(app, ["hash-all", "--text", "6869", "--from", "hex"])
+    assert result.exit_code == 0
+    assert "Hash report source: hex" in result.stdout
+
+
+def test_hash_all_from_base64() -> None:
+    result = runner.invoke(app, ["hash-all", "--text", "aGk=", "--from", "base64"])
+    assert result.exit_code == 0
+    assert "Hash report source: base64" in result.stdout
 
 
 def test_recent_clear() -> None:

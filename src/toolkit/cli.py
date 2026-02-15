@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import base64
 from pathlib import Path
 from typing import Annotated
 
@@ -61,8 +62,22 @@ def _write_or_print(content: str, output: str | None, output_dir: Path) -> str:
     return str(target)
 
 
-def _prompt_for_format(options: list[str]) -> str:
-    typer.echo("Select input format:")
+def _print_header(text: str) -> None:
+    typer.secho(f"\n{text}", bold=True)
+
+
+def _print_conversion_result(source: str, target: str, content: str) -> None:
+    _print_header(f"[{source}->{target}]")
+    typer.echo(content)
+
+
+def _print_conversion_error(source: str, target: str, error: str) -> None:
+    _print_header(f"[{source}->{target}]")
+    typer.secho(f"Conversion failed: {error}", fg=typer.colors.YELLOW)
+
+
+def _prompt_choice(title: str, options: list[str]) -> str:
+    typer.secho(f"\n{title}", bold=True)
     for idx, option in enumerate(options, start=1):
         letter = chr(ord("A") + idx - 1)
         typer.echo(f"  {idx}) [{letter}] {option}")
@@ -81,12 +96,73 @@ def _prompt_for_format(options: list[str]) -> str:
     raise ValueError("Invalid choice. Use a valid number or letter.")
 
 
-def _display_hash_report(text_value: str, input_label: str) -> None:
-    typer.echo("")
-    typer.echo(f"Hash report source: {input_label}")
-    entries = generate_hash_report(text_value.encode("utf-8"), text_value=text_value)
+def _prompt_for_format(options: list[str]) -> str:
+    return _prompt_choice("Select input format:", options)
+
+
+def _prompt_targets(options: list[str]) -> list[str]:
+    mode = _prompt_choice(
+        "Select conversion mode:",
+        [
+            "All formats",
+            "One format",
+            "Multiple formats",
+        ],
+    )
+    if mode == "All formats":
+        return options
+    if mode == "One format":
+        return [_prompt_choice("Select target format:", options)]
+
+    # Multiple: allow comma-separated number/letter entries.
+    typer.secho("\nSelect multiple targets (comma-separated numbers or letters).", bold=True)
+    for idx, option in enumerate(options, start=1):
+        letter = chr(ord("A") + idx - 1)
+        typer.echo(f"  {idx}) [{letter}] {option}")
+    raw = typer.prompt("Targets")
+    selected: list[str] = []
+    for token in [item.strip() for item in raw.split(",") if item.strip()]:
+        if token.isdigit():
+            index = int(token) - 1
+        elif len(token) == 1 and token.isalpha():
+            index = ord(token.upper()) - ord("A")
+        else:
+            raise ValueError(f"Invalid target selection: {token}")
+        if not 0 <= index < len(options):
+            raise ValueError(f"Invalid target selection: {token}")
+        value = options[index]
+        if value not in selected:
+            selected.append(value)
+    if not selected:
+        raise ValueError("At least one target must be selected")
+    return selected
+
+
+def _display_hash_report(payload: bytes, input_label: str, text_value: str | None) -> None:
+    _print_header(f"Hash report source: {input_label}")
+    entries = generate_hash_report(payload, text_value=text_value)
     for entry in entries:
         typer.echo(f"{entry.label}: {entry.value}")
+
+
+def _derive_hash_payload(
+    data: str, source: str, registry: TransformerRegistry
+) -> tuple[bytes, str | None]:
+    if source == "text":
+        return (data.encode("utf-8"), data)
+    if source == "binary":
+        hex_value = registry.transform(data, "binary", "hex")
+        return (bytes.fromhex(hex_value), None)
+    if source == "hex":
+        compact = data.strip().replace(" ", "")
+        return (bytes.fromhex(compact), None)
+    if source == "base64":
+        return (base64.b64decode(data, validate=True), None)
+    try:
+        text_value = registry.transform(data, source, "text")
+        return (text_value.encode("utf-8"), text_value)
+    except ValueError:
+        return (data.encode("utf-8"), None)
 
 
 @app.command("analyze")
@@ -170,15 +246,23 @@ def convert_all_command(
         if not available:
             raise ValueError(f"No available conversions for '{source}'")
 
-        typer.echo(f"Input format: {source}")
+        _print_header(f"Input format: {source}")
+        successes: list[str] = []
+        failures: list[str] = []
         for _, target in available:
-            converted = registry.transform(data, source, target)
-            typer.echo("")
-            typer.echo(f"[{source}->{target}]")
-            typer.echo(converted)
+            try:
+                converted = registry.transform(data, source, target)
+                _print_conversion_result(source, target, converted)
+                successes.append(target)
+            except ValueError as exc:
+                _print_conversion_error(source, target, str(exc))
+                failures.append(target)
 
-        targets = ",".join(target for _, target in available)
-        history.add("convert-all", "success", f"{source}->{targets}")
+        target_summary = ",".join(successes) if successes else "none"
+        status = "success" if successes else "error"
+        if failures:
+            status = "partial" if successes else "error"
+        history.add("convert-all", status, f"{source}->{target_summary}")
     except (ValueError, RuntimeError) as exc:
         history.add("convert-all", "error", str(exc))
         typer.echo(f"Error: {exc}", err=True)
@@ -196,22 +280,23 @@ def interactive_command() -> None:
         data = typer.prompt("Enter input value")
 
         available = registry.available_transformations(source)
-        typer.echo(f"Input format: {source}")
-        for _, target in available:
-            converted = registry.transform(data, source, target)
-            typer.echo("")
-            typer.echo(f"[{source}->{target}]")
-            typer.echo(converted)
+        targets = sorted(target for _, target in available)
+        selected_targets = _prompt_targets(targets)
 
-        if source == "text":
-            hash_text = data
-        else:
+        _print_header(f"Input format: {source}")
+        successes: list[str] = []
+        for target in selected_targets:
             try:
-                hash_text = registry.transform(data, source, "text")
-            except ValueError:
-                hash_text = data
-        _display_hash_report(hash_text, source)
-        history.add("interactive", "success", source)
+                converted = registry.transform(data, source, target)
+                _print_conversion_result(source, target, converted)
+                successes.append(target)
+            except ValueError as exc:
+                _print_conversion_error(source, target, str(exc))
+
+        payload, text_value = _derive_hash_payload(data, source, registry)
+        _display_hash_report(payload, source, text_value)
+        status = "success" if successes else "error"
+        history.add("interactive", status, f"{source}->{','.join(successes)}")
     except (ValueError, RuntimeError) as exc:
         history.add("interactive", "error", str(exc))
         typer.echo(f"Error: {exc}", err=True)
@@ -247,14 +332,8 @@ def hash_all_command(
         data = _load_input(text=text, file=file)
         registry = TransformerRegistry()
         source = from_type.lower().strip() if from_type else detect_from_text(data)
-        if source == "text":
-            hash_text = data
-        else:
-            try:
-                hash_text = registry.transform(data, source, "text")
-            except ValueError:
-                hash_text = data
-        _display_hash_report(hash_text, source)
+        payload, text_value = _derive_hash_payload(data, source, registry)
+        _display_hash_report(payload, source, text_value)
         history.add("hash-all", "success", source)
     except (ValueError, RuntimeError) as exc:
         history.add("hash-all", "error", str(exc))

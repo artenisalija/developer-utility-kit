@@ -90,6 +90,10 @@ toolkit convert --from text --to base64 --text "hello"
 toolkit convert-all --text "hello" --from text
 toolkit convert-all --text "hello" --ask
 toolkit interactive
+# interactive now asks:
+# 1) input format
+# 2) conversion mode (all, one, or multiple targets)
+# 3) value to convert
 toolkit hash-all --text "hello"
 toolkit hash-all --text "01101000 01101001" --from binary
 toolkit format --kind json --text '{"b":2,"a":1}'

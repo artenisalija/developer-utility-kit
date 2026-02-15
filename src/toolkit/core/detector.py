@@ -87,7 +87,7 @@ def _is_base64(value: str) -> bool:
 
 def _is_binary(value: str) -> bool:
     compact = "".join(value.split())
-    return bool(compact) and len(compact) % 8 == 0 and bool(_BINARY_RE.match(value))
+    return bool(compact) and bool(_BINARY_RE.match(value))
 
 
 def _is_hex(value: str) -> bool:

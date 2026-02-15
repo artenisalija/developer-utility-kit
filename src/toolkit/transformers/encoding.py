@@ -21,8 +21,10 @@ def _binary_bits_to_bytes(value: str) -> bytes:
     compact = "".join(value.split())
     if not compact or not _BINARY_RE.match(value):
         raise ValueError("Invalid binary input")
+    # Accept short bit-strings by left-padding to a full byte boundary.
     if len(compact) % 8 != 0:
-        raise ValueError("Binary input length must be a multiple of 8 bits")
+        target_len = ((len(compact) + 7) // 8) * 8
+        compact = compact.rjust(target_len, "0")
     try:
         return bytes(int(compact[i : i + 8], 2) for i in range(0, len(compact), 8))
     except ValueError as exc:
@@ -62,7 +64,10 @@ class Base64ToTextTransformer(BaseTransformer):
             decoded = base64.b64decode(data, validate=True)
         except Exception as exc:
             raise ValueError("Invalid base64 input") from exc
-        return decoded.decode("utf-8")
+        try:
+            return decoded.decode("utf-8")
+        except UnicodeDecodeError as exc:
+            raise ValueError("Decoded base64 bytes are not valid UTF-8 text") from exc
 
 
 class TextToBinaryTransformer(BaseTransformer):
@@ -79,7 +84,10 @@ class BinaryToTextTransformer(BaseTransformer):
 
     def transform(self, data: str) -> str:
         payload = _binary_bits_to_bytes(data)
-        return payload.decode("utf-8")
+        try:
+            return payload.decode("utf-8")
+        except UnicodeDecodeError as exc:
+            raise ValueError("Binary bytes are not valid UTF-8 text") from exc
 
 
 class TextToHexTransformer(BaseTransformer):
@@ -96,7 +104,10 @@ class HexToTextTransformer(BaseTransformer):
 
     def transform(self, data: str) -> str:
         payload = _hex_to_bytes(data)
-        return payload.decode("utf-8")
+        try:
+            return payload.decode("utf-8")
+        except UnicodeDecodeError as exc:
+            raise ValueError("Hex bytes are not valid UTF-8 text") from exc
 
 
 class BinaryToHexTransformer(BaseTransformer):
