@@ -1,8 +1,8 @@
 # Developer Utility Toolkit
 
-[![CI](https://github.com/artenisalija/developer-utility-toolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/artenisalija/developer-utility-toolkit/actions/workflows/ci.yml)
-[![Security](https://github.com/artenisalija/developer-utility-toolkit/actions/workflows/security.yml/badge.svg)](https://github.com/artenisalija/developer-utility-toolkit/actions/workflows/security.yml)
-[![Coverage](https://img.shields.io/badge/coverage-85%25%2B-brightgreen)](https://github.com/artenisalija/developer-utility-toolkit)
+[![CI](https://github.com/artenisalija/developer-utility-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/artenisalija/developer-utility-kit/actions/workflows/ci.yml)
+[![Security](https://github.com/artenisalija/developer-utility-kit/actions/workflows/security.yml/badge.svg)](https://github.com/artenisalija/developer-utility-kit/actions/workflows/security.yml)
+[![Coverage](https://img.shields.io/badge/coverage-85%25%2B-brightgreen)](https://github.com/artenisalija/developer-utility-kit)
 
 Security-focused, modular, format-aware Python CLI for common developer tasks.
 
@@ -48,19 +48,19 @@ pip install ".[all]"
 Install directly from GitHub:
 
 ```bash
-pip install "git+https://github.com/artenisalija/developer-utility-toolkit.git"
+pip install "git+https://github.com/artenisalija/developer-utility-kit.git"
 ```
 
 Install a specific version tag (recommended):
 
 ```bash
-pip install "git+https://github.com/artenisalija/developer-utility-toolkit.git@v0.1.1"
+pip install "git+https://github.com/artenisalija/developer-utility-kit.git@v0.1.1"
 ```
 
 Install from GitHub with all extras:
 
 ```bash
-pip install "developer-utility-toolkit[all] @ git+https://github.com/artenisalija/developer-utility-toolkit.git@v0.1.1"
+pip install "developer-utility-toolkit[all] @ git+https://github.com/artenisalija/developer-utility-kit.git@v0.1.1"
 ```
 
 Install developer tooling:
