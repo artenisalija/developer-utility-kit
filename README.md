@@ -1,7 +1,7 @@
 # Developer Utility Toolkit
 
 [![CI](https://github.com/artenisalija/developer-utility-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/artenisalija/developer-utility-kit/actions/workflows/ci.yml)
-[![Security](https://github.com/artenisalija/developer-utility-kit/actions/workflows/security.yml/badge.svg)](https://github.com/artenisalija/developer-utility-kit/actions/workflows/security.yml)
+
 [![GHCR](https://github.com/artenisalija/developer-utility-kit/actions/workflows/ghcr.yml/badge.svg)](https://github.com/artenisalija/developer-utility-kit/actions/workflows/ghcr.yml)
 [![Coverage](https://img.shields.io/badge/coverage-85%25%2B-brightgreen)](https://github.com/artenisalija/developer-utility-kit)
 
