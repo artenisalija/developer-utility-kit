@@ -9,14 +9,15 @@ Security-focused, modular, format-aware Python CLI for common developer tasks.
 
 ## Features
 
-- Automatic input detection for text, JSON, XML, Base64, URL, and file extension types
-- Direct format conversion using a plugin-based transformer registry
-- JSON and XML formatting, minification, and validation
-- Encoding tools (Base64 and URL encode/decode)
-- Binary/Hex/Text/Base64 conversion utilities
-- Interactive conversion mode (choose format by number/letter and print all direct outputs)
+- Automatic input detection for text, JSON, XML, binary, hex, base64, URL, and file extension types
+- Direct format conversion via transformer registry (no hidden chained conversion)
+- Guided interactive mode: select input format, choose conversion mode (`all`, `one`, `multiple`), view formatted outputs
+- Conversion commands: `convert`, `convert-all`, `formats`
+- JSON/XML formatting, minification, and validation
+- Encoding utilities: binary, hex, base64, URL encoding/decoding
+- Hash and checksum reporting with `hash-all` and `interactive`
 - Image pixelation utility (optional `pillow`)
-- Sitemap generator and sitemap fetcher with URL validation and request timeouts
+- Sitemap generator and fetcher with URL validation and request timeouts
 - Local command history (`~/.developer_utility_toolkit/history/history.jsonl`)
 
 ## Architecture
@@ -85,17 +86,17 @@ pip install ".[all,dev]"
 ## Usage
 
 ```bash
+toolkit --help
+toolkit formats
 toolkit analyze --text '{"name":"dev"}'
 toolkit convert --from text --to base64 --text "hello"
 toolkit convert-all --text "hello" --from text
+toolkit convert-all --text "11111111" --from binary
 toolkit convert-all --text "hello" --ask
 toolkit interactive
-# interactive now asks:
-# 1) input format
-# 2) conversion mode (all, one, or multiple targets)
-# 3) value to convert
 toolkit hash-all --text "hello"
 toolkit hash-all --text "01101000 01101001" --from binary
+toolkit hash-all --text "68656c6c6f" --from hex
 toolkit format --kind json --text '{"b":2,"a":1}'
 toolkit validate --kind xml --text '<root><a>1</a></root>'
 toolkit minify --kind json --text '{"b":2,"a":1}'
@@ -104,6 +105,55 @@ toolkit sitemap generate --base-url https://example.com --path / --path /docs
 toolkit sitemap fetch --url https://example.com/sitemap.xml
 toolkit recent show --limit 10
 ```
+
+## Interactive Flow
+
+`toolkit interactive` asks for:
+- Input format (number or letter)
+- Input value
+- Conversion mode:
+  - `All formats`
+  - `One format`
+  - `Multiple formats` (comma-separated choices)
+
+Then it prints:
+- Structured conversion output blocks
+- Full hash/checksum report for the input bytes
+
+## Hash/Checksum Algorithms
+
+`toolkit hash-all` and `toolkit interactive` report:
+- MD2 Hash Generator
+- MD4 Hash Generator
+- MD5 Hash Generator
+- NTLM Hash Generator
+- SHA1 Hash Generator
+- SHA2 Hash Generator
+- SHA224 Hash Generator
+- SHA256 Hash Generator
+- SHA384 Hash Generator
+- SHA512 Hash Generator
+- SHA512/224 Hash Generator
+- SHA512/256 Hash Generator
+- SHA3-224 Hash Generator
+- SHA3-256 Hash Generator
+- SHA3-384 Hash Generator
+- SHA3-512 Hash Generator
+- CRC-16 Hash Generator
+- CRC-32 Hash Generator
+- Shake-128 Hash Generator
+- Shake-256 Hash Generator
+- MD6 Hash Generator
+- Whirlpool Hash Generator
+- Checksum Calculator
+
+Note: algorithm availability depends on Python/OpenSSL build. Unsupported algorithms are marked as unavailable at runtime.
+
+## Binary Input Notes
+
+- Binary input accepts `0`/`1` with optional spaces.
+- Non-8-bit lengths are accepted and left-padded to full bytes (`1010` becomes `00001010`).
+- If one conversion target fails (for example, binary bytes are not valid UTF-8 text), other targets still continue in `convert-all` and `interactive`.
 
 ## Security Philosophy
 
@@ -142,3 +192,9 @@ pre-commit run --all-files
 - `release.yml`: runs on version tags (`v*.*.*`), builds wheel/sdist, runs tests, publishes to PyPI, creates GitHub release notes
 - `ghcr.yml`: builds and publishes multi-arch Docker images to GHCR (`ghcr.io/artenisalija/developer-utility-kit`)
 - Dependabot enabled for Python packages and GitHub Actions
+
+## Update
+
+```bash
+pip install -U developer-utility-toolkit
+```
