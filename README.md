@@ -36,31 +36,13 @@ Design choices:
 
 ```bash
 python -m pip install --upgrade pip
-pip install .
+pip install developer-utility-toolkit
 ```
 
 Install all optional features:
 
 ```bash
-pip install ".[all]"
-```
-
-Install directly from GitHub:
-
-```bash
-pip install "git+https://github.com/artenisalija/developer-utility-kit.git"
-```
-
-Install a specific version tag (recommended):
-
-```bash
-pip install "git+https://github.com/artenisalija/developer-utility-kit.git@v0.1.1"
-```
-
-Install from GitHub with all extras:
-
-```bash
-pip install "developer-utility-toolkit[all] @ git+https://github.com/artenisalija/developer-utility-kit.git@v0.1.1"
+pip install "developer-utility-toolkit[all]"
 ```
 
 Install developer tooling:
