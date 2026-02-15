@@ -16,7 +16,13 @@ from toolkit.history.manager import HistoryManager
 from toolkit.image_tools.pixelate import pixelate_image
 from toolkit.web_tools.sitemap import fetch_sitemap_urls, generate_sitemap
 
-app = typer.Typer(help="Developer Utility Toolkit")
+app = typer.Typer(
+    help=(
+        "Developer Utility Toolkit.\n\n"
+        "Use 'toolkit formats' to view all supported direct conversions.\n"
+        "Use 'toolkit convert-all --ask --text <value>' for guided, multi-output conversion."
+    )
+)
 image_app = typer.Typer(help="Image utilities")
 sitemap_app = typer.Typer(help="Sitemap utilities")
 recent_app = typer.Typer(help="View and manage local command history")
@@ -104,7 +110,7 @@ def convert_command(
     output: Annotated[str | None, typer.Option(help="Output filename")] = None,
     output_dir: Annotated[Path, typer.Option(help="Output directory")] = DEFAULT_OUTPUT_DIR,
 ) -> None:
-    """Convert data between supported formats."""
+    """Convert data using one direct input->output transformation."""
     history = _history()
     try:
         targets_raw = to or []
@@ -136,7 +142,7 @@ def convert_all_command(
     from_type: Annotated[str | None, typer.Option("--from", help="Input type override")] = None,
     ask: Annotated[bool, typer.Option(help="Prompt to choose input type")] = False,
 ) -> None:
-    """Show all available direct conversions for one input."""
+    """Show all direct conversions for an input (interactive mode supported)."""
     history = _history()
     try:
         data = _load_input(text=text, file=file)
@@ -168,6 +174,23 @@ def convert_all_command(
         history.add("convert-all", "error", str(exc))
         typer.echo(f"Error: {exc}", err=True)
         raise typer.Exit(code=2) from exc
+
+
+@app.command("formats")
+def formats_command() -> None:
+    """List all currently available direct conversion pairs."""
+    registry = TransformerRegistry()
+    by_input: dict[str, list[str]] = {}
+    for input_type, output_type in registry.available_transformations():
+        by_input.setdefault(input_type, []).append(output_type)
+
+    if not by_input:
+        typer.echo("No converters registered.")
+        raise typer.Exit(code=1)
+
+    for input_type in sorted(by_input):
+        outputs = ", ".join(sorted(by_input[input_type]))
+        typer.echo(f"{input_type} -> {outputs}")
 
 
 @app.command("format")
