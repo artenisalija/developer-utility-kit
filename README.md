@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/artenisalija/developer-utility-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/artenisalija/developer-utility-kit/actions/workflows/ci.yml)
 [![Security](https://github.com/artenisalija/developer-utility-kit/actions/workflows/security.yml/badge.svg)](https://github.com/artenisalija/developer-utility-kit/actions/workflows/security.yml)
+[![GHCR](https://github.com/artenisalija/developer-utility-kit/actions/workflows/ghcr.yml/badge.svg)](https://github.com/artenisalija/developer-utility-kit/actions/workflows/ghcr.yml)
 [![Coverage](https://img.shields.io/badge/coverage-85%25%2B-brightgreen)](https://github.com/artenisalija/developer-utility-kit)
 
 Security-focused, modular, format-aware Python CLI for common developer tasks.
@@ -43,6 +44,26 @@ Install all optional features:
 
 ```bash
 pip install "developer-utility-toolkit[all]"
+```
+
+## Docker (Alternative Install)
+
+Pull from GitHub Container Registry:
+
+```bash
+docker pull ghcr.io/artenisalija/developer-utility-kit:latest
+```
+
+Run help:
+
+```bash
+docker run --rm ghcr.io/artenisalija/developer-utility-kit:latest --help
+```
+
+Run a command with mounted files:
+
+```bash
+docker run --rm -v "$PWD:/work" -w /work ghcr.io/artenisalija/developer-utility-kit:latest format --kind json --file input.json --output output.json
 ```
 
 Install developer tooling:
@@ -100,4 +121,5 @@ pre-commit run --all-files
 - `ci.yml`: lint + format + mypy + tests + coverage (>=85%) on Python 3.11/3.12
 - `security.yml`: Bandit + pip-audit + Safety
 - `release.yml`: runs on version tags (`v*.*.*`), builds wheel/sdist, runs tests, publishes to PyPI, creates GitHub release notes
+- `ghcr.yml`: builds and publishes multi-arch Docker images to GHCR (`ghcr.io/artenisalija/developer-utility-kit`)
 - Dependabot enabled for Python packages and GitHub Actions
