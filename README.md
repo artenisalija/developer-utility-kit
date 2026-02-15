@@ -1,8 +1,8 @@
 # Developer Utility Toolkit
 
-[![CI](https://github.com/artenisalija/developer-utility-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/artenisalija/developer-utility-kit/actions/workflows/ci.yml)
-[![Security](https://github.com/artenisalija/developer-utility-kit/actions/workflows/security.yml/badge.svg)](https://github.com/artenisalija/developer-utility-kit/actions/workflows/security.yml)
-[![GHCR](https://github.com/artenisalija/developer-utility-kit/actions/workflows/ghcr.yml/badge.svg)](https://github.com/artenisalija/developer-utility-kit/actions/workflows/ghcr.yml)
+[![CI](https://github.com/artenisalija/developer-utility-kit/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/artenisalija/developer-utility-kit/actions/workflows/ci.yml?query=branch%3Amain)
+[![Security](https://github.com/artenisalija/developer-utility-kit/actions/workflows/security.yml/badge.svg?branch=main&event=push)](https://github.com/artenisalija/developer-utility-kit/actions/workflows/security.yml?query=branch%3Amain)
+[![GHCR](https://github.com/artenisalija/developer-utility-kit/actions/workflows/ghcr.yml/badge.svg?branch=main&event=push)](https://github.com/artenisalija/developer-utility-kit/actions/workflows/ghcr.yml?query=branch%3Amain)
 [![Coverage](https://img.shields.io/badge/coverage-85%25%2B-brightgreen)](https://github.com/artenisalija/developer-utility-kit)
 
 Security-focused, modular, format-aware Python CLI for common developer tasks.
