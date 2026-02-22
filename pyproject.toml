@@ -48,7 +48,7 @@ dev = [
   "pytest-cov==6.0.0",
   "bandit==1.8.2",
   "pip-audit==2.7.3",
-  "safety==3.2.14",
+  "safety==3.7.0",
   "types-requests==2.32.0.20241016"
 ]
 
